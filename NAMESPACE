@@ -1,0 +1,5 @@
+exportPattern("^[[:alpha:]]+")
+importFrom("grDevices", "adjustcolor", "dev.off", "dev.new", "png", "savePlot")
+importFrom("graphics", "abline", "arrows", "axis", "layout", "mtext",
+           "par", "points", "polygon", "rect")
+importFrom("stats", "coef", "confint", "family", "na.omit")
