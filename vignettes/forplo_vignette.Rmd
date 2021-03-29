@@ -2,7 +2,7 @@
 title: "forplo - flexible forest plots with R"
 author: "vincent10kd@gmail.com"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: rmarkdown::github_document
 vignette: >
   %\VignetteIndexEntry{forplo}
   %\VignetteEngine{knitr::rmarkdown}
