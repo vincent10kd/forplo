@@ -1,10 +1,9 @@
 Package: forplo
 Type: Package
-Title: Flexible Forest Plots with R
+Title: Flexible Forest Plots
 Version: 0.1.0
-Author: Vincent ten Cate, PhD
-Maintainer: "Vincent ten Cate, PhD" <vincent10kd@gmail.com>
-Description: Simplifies the creation and customization of forest plots (alternatively called dot-and-whisker plots). Input classes accepted by forplo are data.frame, matrix, lm, glm, and coxph. forplo was written in base R and does not depend on other packages.
+Authors@R: person("Vincent", "ten Cate, PhD", email = "vincent10kd@gmail.com", role = c("cre","aut"))
+Description: Simplifies the creation and customization of forest plots (alternatively called dot-and-whisker plots). Input classes accepted by 'forplo' are data.frame, matrix, lm, glm, and coxph. 'forplo' was written in base R and does not depend on other packages.
 License: GPL-3
 Encoding: UTF-8
 Language: en-US
@@ -14,7 +13,6 @@ VignetteBuilder:
     knitr,
     rmarkdown,
     lattice
-LazyData: true
 RoxygenNote: 7.1.1
 Suggests: 
     knitr,

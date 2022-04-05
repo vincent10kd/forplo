@@ -1,5 +1,5 @@
 ---
-title: "forplo - flexible forest plots with R"
+title: "forplo - flexible forest plots"
 author: "vincent10kd@gmail.com"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -14,6 +14,20 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+#### TODOs ######
+# * convert grouping var to factor before coercing to numeric, currently fails with character vectors
+# * get rid of error message for zero-length arrows
+# * make extrafont a depend and first load fonts
+# * add readable error message for when character matrix/df is entered as mat
+# * alternatively, convert to numeric
+# * make sure that duplicate rownames/row.labels do not lead to issues
+# * add readable error message for when CI columns are swapped
+# * check that lower CI < upper bound, if not trigger error and stop
+# * exception: all CIs are the same and estimate as well. Then plot and suppress warnings.
+#################
+
+
 forplo <- function(mat,
                    em='OR',
                    row.labels=NULL,
@@ -132,8 +146,9 @@ forplo <- function(mat,
   # p-value conditions
   if(!is.null(pval)&length(pval)!=nrow(mat)) stop('The length of pval should be equal to the number of rows of mat')
   if(!is.null(add.columns)&!is.null(pval)){stop('add.columns cannot be used if pval is not NULL.')}
-  # store original margins
-  opar <- par()$mar
+  # store original par settings
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   # fill colors
   if(!is.null(fill.by)){
     if(is.null(fill.colors)){stop('fill.colors must be specified if fill.by is not NULL.')}
@@ -374,9 +389,6 @@ forplo <- function(mat,
     if(save.type%in%c('wmf','.wmf','WMF')){savePlot(paste0(save.path,save.name,'.wmf'),type='wmf')}
     dev.off()
   }
-  # restore original plot settings
-  par(mar=opar)
-  layout(1)
 }
 ```
 ## Background
