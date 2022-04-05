@@ -18,13 +18,19 @@ forplo(
   ci.sep = "-",
   ci.lwd = 1.5,
   ci.edge = TRUE,
-  font = "Calibri",
+  font = "sans",
   groups = NULL,
   grouplabs = NULL,
   group.space = 1,
   group.italics = FALSE,
+  indent.groups = NULL,
   left.align = FALSE,
   favorlabs = NULL,
+  add.arrow.left = FALSE,
+  add.arrow.right = FALSE,
+  arrow.left.length = 3,
+  arrow.right.length = 3,
+  arrow.vadj = 0,
   sort = FALSE,
   char = 20,
   size = 1.5,
@@ -46,6 +52,11 @@ forplo(
   shade.alpha = 0.05,
   fill.by = NULL,
   fill.colors = NULL,
+  fill.labs = NULL,
+  legend = FALSE,
+  legend.vadj = 0,
+  legend.hadj = 0,
+  legend.spacing = 1,
   margin.left = NULL,
   margin.top = 0,
   margin.bottom = 2,
@@ -97,9 +108,21 @@ forplo(
 
 \item{group.italics}{Set to TRUE to italicize the group labels.}
 
+\item{indent.groups}{A numeric vector indicating which groups to indent (works only when left.align==TRUE)}
+
 \item{left.align}{Set to TRUE to left align variable and group labels.}
 
 \item{favorlabs}{A character vector of length 2, providing labels for underneath the x-axis (e.g. c('favors control','favors intervention')).}
+
+\item{add.arrow.left}{Adds an arrow pointing left underneath the x-axis.}
+
+\item{add.arrow.right}{Adds an arrow pointing right underneath the x-axis.}
+
+\item{arrow.left.length}{Controls the length of the arrow pointing left.}
+
+\item{arrow.right.length}{Controls the length of the arrow pointing right.}
+
+\item{arrow.vadj}{Allows to adjust the vertical placement of the arrows.}
 
 \item{sort}{Set to TRUE to sort the rows by effect size (not compatible with groups or diamond).}
 
@@ -143,6 +166,16 @@ forplo(
 
 \item{fill.colors}{Character vector of length unique(fill.by), with colors for each color group.}
 
+\item{fill.labs}{Character vector of length fill.colors, specifying the legend labels.}
+
+\item{legend}{Set to TRUE to display a legend if fill.colors is not NULL.}
+
+\item{legend.vadj}{Controls the vertical placement of the legend.}
+
+\item{legend.hadj}{Controls the horizontal placement of the legend.}
+
+\item{legend.spacing}{Controls the spacing between legend items.}
+
 \item{margin.left}{Controls size of left margin.}
 
 \item{margin.top}{Controls size of top margin.}
@@ -181,11 +214,10 @@ mod1 <- lm(Sepal.Length~Sepal.Width+Species+Petal.Width+Petal.Length,iris)
 
 #==== Example forest plots====================
 # default plot for linear regression model
-forplo(mod1,font='Helvetica')
+forplo(mod1)
 
 # customized plot for linear regression model
 forplo(mod1,
-       font='Helvetica',
        row.labels=c('Sepal width','Versicolor','Virginica','Petal width','Petal length'),
        groups=c(1,2,2,3,3),
        grouplabs=c('Sepal traits','Species','Petal traits'),
