@@ -22,8 +22,14 @@
 #' @param grouplabs A character vector of equal length to the number of groups, with the labels of each group.
 #' @param group.space A single numeric value to indicate how much empty rows should be between grouped estimates.
 #' @param group.italics Set to TRUE to italicize the group labels.
+#' @param indent.groups A numeric vector indicating which groups to indent (works only when left.align==TRUE)
 #' @param left.align Set to TRUE to left align variable and group labels.
 #' @param favorlabs A character vector of length 2, providing labels for underneath the x-axis (e.g. c('favors control','favors intervention')).
+#' @param add.arrow.left Adds an arrow pointing left underneath the x-axis.
+#' @param add.arrow.right Adds an arrow pointing right underneath the x-axis.
+#' @param arrow.left.length Controls the length of the arrow pointing left.
+#' @param arrow.right.length Controls the length of the arrow pointing right.
+#' @param arrow.vadj Allows to adjust the vertical placement of the arrows.
 #' @param sort Set to TRUE to sort the rows by effect size (not compatible with groups or diamond).
 #' @param char Controls the character to display for the dots. Equivalent to pch in the base R plot function.
 #' @param size Controls the size of the dots. Equivalent to cex in the base R plot function.
@@ -45,6 +51,11 @@
 #' @param shade.alpha Controls the transparency of the row shading color. Default is 0.05.
 #' @param fill.by Numeric vector of length nrow(mat) indicating color group membership of each element.
 #' @param fill.colors Character vector of length unique(fill.by), with colors for each color group.
+#' @param fill.labs Character vector of length fill.colors, specifying the legend labels.
+#' @param legend Set to TRUE to display a legend if fill.colors is not NULL.
+#' @param legend.vadj Controls the vertical placement of the legend.
+#' @param legend.hadj Controls the horizontal placement of the legend.
+#' @param legend.spacing Controls the spacing between legend items.
 #' @param margin.left Controls size of left margin.
 #' @param margin.top Controls size of top margin.
 #' @param margin.bottom Controls size of bottom margin.
@@ -65,11 +76,10 @@
 #'
 #' #==== Example forest plots====================
 #' # default plot for linear regression model
-#' forplo(mod1,font='Helvetica')
+#' forplo(mod1)
 #'
 #' # customized plot for linear regression model
 #' forplo(mod1,
-#'        font='Helvetica',
 #'        row.labels=c('Sepal width','Versicolor','Virginica','Petal width','Petal length'),
 #'        groups=c(1,2,2,3,3),
 #'        grouplabs=c('Sepal traits','Species','Petal traits'),
@@ -81,7 +91,6 @@
 #'
 #' ## More examples are given in the vignette.
 #' @export
-#' @importFrom dplyr "%>%"
 
 forplo <- function(mat,
                    em='OR',
@@ -96,13 +105,19 @@ forplo <- function(mat,
                    ci.sep='-',
                    ci.lwd=1.5,
                    ci.edge=TRUE,
-                   font='Calibri',
+                   font='sans',
                    groups=NULL,
                    grouplabs=NULL,
                    group.space=1,
                    group.italics=FALSE,
+                   indent.groups=NULL,
                    left.align=FALSE,
                    favorlabs=NULL,
+                   add.arrow.left=FALSE,
+                   add.arrow.right=FALSE,
+                   arrow.left.length=3,
+                   arrow.right.length=3,
+                   arrow.vadj=0,
                    sort=FALSE,
                    char=20,
                    size=1.5,
@@ -124,6 +139,11 @@ forplo <- function(mat,
                    shade.alpha=0.05,
                    fill.by=NULL,
                    fill.colors=NULL,
+                   fill.labs=NULL,
+                   legend=FALSE,
+                   legend.vadj=0,
+                   legend.hadj=0,
+                   legend.spacing=1,
                    margin.left=NULL,
                    margin.top=0,
                    margin.bottom=2,
@@ -144,6 +164,9 @@ forplo <- function(mat,
     if(sum(mat[,1]<0)>0&linreg==FALSE){
       message('Since column 1 of mat contains values below 0, linreg has been set to TRUE.')
       linreg <- TRUE
+    }
+    if(class(mat)[1]=='matrix'){
+      mat <- as.data.frame(mat)
     }
   }
   if(flipbelow1==TRUE&is.null(favorlabs)!=TRUE){stop('favorlabs cannot be used when flipbelow1 is TRUE.')}
@@ -176,6 +199,13 @@ forplo <- function(mat,
   # if row.labels are given, replace rownames
   if(!is.null(row.labels)){
     if(length(row.labels)!=nrow(mat)){stop('The length of row.labels should be equal to the number of rows of mat.')}
+    if(any(duplicated(row.labels))==TRUE){
+      dups <- which(duplicated(row.labels))
+      row.labels2 <- make.unique(row.labels)
+      ec <- as.numeric(gsub('.*\\.','',row.labels2)[dups])
+      row.labels[dups] <- paste0(row.labels[dups],
+                                 unlist(lapply(ec,function(x) paste0(rep(' ',x),collapse=''))))
+    }
     rownames(mat) <- row.labels}
   # function to count number of characters
   charcount <- function(x){
@@ -220,6 +250,16 @@ forplo <- function(mat,
     groups <- as.numeric(groups)
     mat <- mat[order(groups),]
     groups <- sort(groups)
+    # indent subgroups by group index
+    if(!is.null(indent.groups)){
+      if(left.align==FALSE){
+        message('If indent.groups is not NULL, left.align should be set to TRUE.\n')
+        left.align <- TRUE
+      }
+      iv <- indent.groups
+      rownames(mat)[which(groups%in%iv)] <- paste0('    ',rownames(mat)[which(groups%in%iv)])
+      grouplabs[iv] <- paste0('    ',grouplabs[iv])
+    }
     g.ind <- which(diff(groups)==1)
     g.start <- c(1,g.ind+1)
     g.end <- c(g.ind,nrow(mat))
@@ -297,7 +337,10 @@ forplo <- function(mat,
     scaledot.by <- scaledot.by[sort.index]
   }
   # set par
-  margin.bottom <- ifelse(!is.null(favorlabs)&margin.bottom<5,
+  margin.bottom <- ifelse((!is.null(favorlabs)|
+                             !is.null(add.arrow.left)|
+                             !is.null(add.arrow.right)|
+                             legend==TRUE&!is.null(fill.labs))&margin.bottom<5,
                           margin.bottom+3,margin.bottom)
   margin.right <- ifelse(!is.null(pval)&margin.right<15,15,margin.right)
   margin.right <- ifelse(!is.null(add.columns),
@@ -320,8 +363,16 @@ forplo <- function(mat,
     par(mar=c(margin.bottom,margin.left,margin.top,margin.right))
   }
   # plot
-  if(linreg==TRUE){xlimits <- c(min(mat[,2],na.rm=T)*ifelse(min(mat[,2],na.rm=T)<0,1.2,-1.2),max(mat[,3],na.rm=T)*1.2)}
-  else{xlimits <- exp(c(min(log(mat[,2]),na.rm=T)*1.2,max(log(mat[,3]),na.rm=T)*1.2))}
+  if(linreg==TRUE){xlimits <- c(min(mat[,2],na.rm=TRUE)*ifelse(min(mat[,2],na.rm=TRUE)<0,1.2,-1.2),max(mat[,3],na.rm=TRUE)*1.2)}
+  else if(linreg==FALSE){
+    if(min(mat[,2],na.rm=TRUE)==0){
+      xlimits <- exp(c(min(log(mat[,2]+1e-10),na.rm=TRUE)*1.2,max(log(mat[,3]),na.rm=TRUE)*1.2))
+    }
+    if(min(mat[,2],na.rm=TRUE)>0){
+      xlimits <- exp(c(min(log(mat[,2]),na.rm=TRUE)*1.2,max(log(mat[,3]),na.rm=TRUE)*1.2))
+    }
+  }
+  if(linreg==FALSE&xlim[1]==0){xlim[1] <- 1e-2}
   HR <- mat[,1]
   CI <- mat[,2:3]
   yvec <- seq(lHR,1)
@@ -392,10 +443,29 @@ forplo <- function(mat,
       abline(v=x2,lty=3,col=diamond.col)
     }
   }
+  # display arrows below x-axis
+  if(add.arrow.left==TRUE){
+    ex <- paste0(c('\\254',rep('\\276',arrow.left.length)),collapse='')
+    mtext(side=1, line=1.7-arrow.vadj, parse(text=paste0("''*symbol('",ex,"')*''")),adj=0)
+  }
+  if(add.arrow.right==TRUE){
+    ex <- paste0(c(rep('\\276',arrow.right.length),'\\256'),collapse='')
+    mtext(side=1, line=1.7-arrow.vadj, parse(text=paste0("''*symbol('",ex,"')*''")),adj=1)
+  }
   # display labels below x-axis
   if(!is.null(favorlabs)){
-    mtext(side=1, line=2.5, favorlabs[1],adj=0,font=3,family=font)
-    mtext(side=1, line=2.5, favorlabs[2],adj=1,font=3,family=font)
+    mtext(side=1, line=2.5-arrow.vadj, favorlabs[1],adj=0,font=3,family=font)
+    mtext(side=1, line=2.5-arrow.vadj, favorlabs[2],adj=1,font=3,family=font)
+  }
+  # add legend
+  if(!is.null(fill.labs)&legend==TRUE){
+    u_int <- par('usr')[3]+legend.vadj
+    mtext('Legend',side=4, at=u_int, line=1+legend.hadj, family=font,las=2, font=2)
+    for(f in 1:length(unique(na.omit(fill.colors)))){
+      mtext(expression(''*symbol('\267')*''), side=4, at=u_int-(f*.5*legend.spacing),
+            line=1.5+legend.hadj, family=font,las=2, col=unique(na.omit(fill.colors))[f])
+      mtext(fill.labs[f], side=4, at=u_int-(f*.5*legend.spacing), line=2+legend.hadj, family=font, las=2)
+    }
   }
   # horizontal bar
   if(horiz.bar==TRUE){abline(h=0,lty=1)}
