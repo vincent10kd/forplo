@@ -90,7 +90,9 @@
 #'        title='Linear regression with grouped estimates')
 #'
 #' ## More examples are given in the vignette.
+#'
 #' @export
+#'
 
 forplo <- function(mat,
                    em='OR',
@@ -181,9 +183,9 @@ forplo <- function(mat,
   if(class(omat)[1]%in%c('lm','glm')){
     pval <- Round(summary(mat)$coef[-1,4],4)
     pval[pval==0.0000] <- '<0.0001'
-    mat <- cbind(coef(mat),confint(mat))[-1,]
+    mat <- cbind(stats::coef(mat),stats::confint(mat))[-1,]
     colnames(mat) <- c('est','lci','uci')
-    if(family(omat)$family=='gaussian'){linreg <- TRUE}
+    if(stats::family(omat)$family=='gaussian'){linreg <- TRUE}
     else{
       linreg <- FALSE
       mat <- exp(mat)
@@ -193,7 +195,7 @@ forplo <- function(mat,
     em <- 'HR'
     pval <- Round(summary(mat)$coef[,5],4)
     pval[pval<=0.0000] <- '<0.0001'
-    mat <- exp(cbind(coef(mat),confint(mat)))
+    mat <- exp(cbind(stats::coef(mat),stats::confint(mat)))
     colnames(mat) <- c('est','lci','uci')
   }
   # if row.labels are given, replace rownames
@@ -232,7 +234,7 @@ forplo <- function(mat,
   if(!is.null(pval)&length(pval)!=nrow(mat)) stop('The length of pval should be equal to the number of rows of mat')
   if(!is.null(add.columns)&!is.null(pval)){stop('add.columns cannot be used if pval is not NULL.')}
   # store original margins
-  opar <- par()$mar
+  opar <- graphics::par()$mar
   # fill colors
   if(!is.null(fill.by)){
     if(is.null(fill.colors)){stop('fill.colors must be specified if fill.by is not NULL.')}
@@ -350,17 +352,17 @@ forplo <- function(mat,
     margin.left <- pmin(13,pmax(8,lablen-8))
   }
   margin.top <- ifelse(!is.null(title),3,0)
-  par(mar=c(margin.bottom,margin.left,margin.top,margin.right))
-  if(!is.null(margin.right)){par(mar=c(margin.bottom,margin.left,margin.top,margin.right))}
+  graphics::par(mar=c(margin.bottom,margin.left,margin.top,margin.right))
+  if(!is.null(margin.right)){graphics::par(mar=c(margin.bottom,margin.left,margin.top,margin.right))}
   # save plot
   if(save==TRUE){
     if(!save.type%in%c('wmf','.wmf','WMF','png','.png','PNG')){
       message('forplo() only accepts png and wmf as save formats. Your plot will not be saved.')}
     if(save.type%in%c('wmf','.wmf','WMF')){
-      dev.new(save.width,save.height)}
+      grDevices::dev.new(save.width,save.height)}
     if(save.type%in%c('png','.png','PNG')){
-      png(paste0(save.path,save.name,'.png'),width=save.width,height=save.height,units='in',res=300)}
-    par(mar=c(margin.bottom,margin.left,margin.top,margin.right))
+      grDevices::png(paste0(save.path,save.name,'.png'),width=save.width,height=save.height,units='in',res=300)}
+    graphics::par(mar=c(margin.bottom,margin.left,margin.top,margin.right))
   }
   # plot
   if(linreg==TRUE){xlimits <- c(min(mat[,2],na.rm=TRUE)*ifelse(min(mat[,2],na.rm=TRUE)<0,1.2,-1.2),max(mat[,3],na.rm=TRUE)*1.2)}
@@ -392,16 +394,16 @@ forplo <- function(mat,
   if(!is.null(shade.every)){
     shade_index <- nrow(mat)/shade.every
     for(s in seq(1,shade_index,2)){
-      rect(xlim[1],0.5+shade.every*(s-1),
+      graphics::rect(xlim[1],0.5+shade.every*(s-1),
            xlim[2],0.5+shade.every+shade.every*(s-1),
-           col=adjustcolor(shade.col,alpha.f=shade.alpha),border=FALSE)
+           col=grDevices::adjustcolor(shade.col,alpha.f=shade.alpha),border=FALSE)
     }
   }
   # draw CIs
   for(i in seq(1,lHR)){
     j <- seq(lHR,1)[i]
     if(is.na(CI[j,1])|diavec[j]==1){next}
-    arrows(y0=i,
+    graphics::arrows(y0=i,
            x0=CI[j,1],
            y1=i,
            x1=CI[j,2],
@@ -411,19 +413,19 @@ forplo <- function(mat,
                       ifelse(sigt%in%Round(seq(Round(CI[j,1],3),Round(CI[j,2],3),by=0.001),3),insig.col,1)))
   }
   # dotted null line
-  abline(v=sigt,lty=3)
+  graphics::abline(v=sigt,lty=3)
   # draw points
   if(is.null(fill.colors)){
-    points(y=yvec[which(diavec==0)],x=HR[1:lHR][which(diavec==0)],pch=char,col=col,cex=size)
+    graphics::points(y=yvec[which(diavec==0)],x=HR[1:lHR][which(diavec==0)],pch=char,col=col,cex=size)
   }
   if(!is.null(fill.colors)){
-    points(y=yvec[which(diavec==0)],x=HR[1:lHR][which(diavec==0)],pch=char,
+    graphics::points(y=yvec[which(diavec==0)],x=HR[1:lHR][which(diavec==0)],pch=char,
            col=fill.colors[which(diavec==0)],cex=size)
   }
   # if scaledot.by is given, draw each dot with different size
   if(!is.null(scaledot.by)){
     for(i in 1:length(yvec[which(diavec==0)])){
-      points(y=yvec[which(diavec==0)][i],x=HR[1:lHR][which(diavec==0)][i],pch=char,
+      graphics::points(y=yvec[which(diavec==0)][i],x=HR[1:lHR][which(diavec==0)][i],pch=char,
              col=ifelse(!is.null(fill.by),fill.colors[which(diavec==0)][i],col),
              cex=(scaledot.by[which(diavec==0)][i]/max(scaledot.by,na.rm=T))*4*scaledot.factor)
     }
@@ -437,83 +439,83 @@ forplo <- function(mat,
       x3 <- CI[,2][select][diamond[i]]
       dia.x <- c(x1,x2,x3,x2,x1)
       dia.y <- c(y1,y1+0.15,y1,y1-0.15,y1)
-      polygon(dia.x,dia.y,col=diamond.col,border=diamond.col)
+      graphics::polygon(dia.x,dia.y,col=diamond.col,border=diamond.col)
     }
     if(diamond.line!=FALSE){
-      abline(v=x2,lty=3,col=diamond.col)
+      graphics::abline(v=x2,lty=3,col=diamond.col)
     }
   }
   # display arrows below x-axis
   if(add.arrow.left==TRUE){
     ex <- paste0(c('\\254',rep('\\276',arrow.left.length)),collapse='')
-    mtext(side=1, line=1.7-arrow.vadj, parse(text=paste0("''*symbol('",ex,"')*''")),adj=0)
+    graphics::mtext(side=1, line=1.7-arrow.vadj, parse(text=paste0("''*symbol('",ex,"')*''")),adj=0)
   }
   if(add.arrow.right==TRUE){
     ex <- paste0(c(rep('\\276',arrow.right.length),'\\256'),collapse='')
-    mtext(side=1, line=1.7-arrow.vadj, parse(text=paste0("''*symbol('",ex,"')*''")),adj=1)
+    graphics::mtext(side=1, line=1.7-arrow.vadj, parse(text=paste0("''*symbol('",ex,"')*''")),adj=1)
   }
   # display labels below x-axis
   if(!is.null(favorlabs)){
-    mtext(side=1, line=2.5-arrow.vadj, favorlabs[1],adj=0,font=3,family=font)
-    mtext(side=1, line=2.5-arrow.vadj, favorlabs[2],adj=1,font=3,family=font)
+    graphics::mtext(side=1, line=2.5-arrow.vadj, favorlabs[1],adj=0,font=3,family=font)
+    graphics::mtext(side=1, line=2.5-arrow.vadj, favorlabs[2],adj=1,font=3,family=font)
   }
   # add legend
   if(!is.null(fill.labs)&legend==TRUE){
-    u_int <- par('usr')[3]+legend.vadj
-    mtext('Legend',side=4, at=u_int, line=1+legend.hadj, family=font,las=2, font=2)
-    for(f in 1:length(unique(na.omit(fill.colors)))){
-      mtext(expression(''*symbol('\267')*''), side=4, at=u_int-(f*.5*legend.spacing),
-            line=1.5+legend.hadj, family=font,las=2, col=unique(na.omit(fill.colors))[f])
-      mtext(fill.labs[f], side=4, at=u_int-(f*.5*legend.spacing), line=2+legend.hadj, family=font, las=2)
+    u_int <- graphics::par('usr')[3]+legend.vadj
+    graphics::mtext('Legend',side=4, at=u_int, line=1+legend.hadj, family=font,las=2, font=2)
+    for(f in 1:length(unique(stats::na.omit(fill.colors)))){
+      graphics::mtext(expression(''*symbol('\267')*''), side=4, at=u_int-(f*.5*legend.spacing),
+            line=1.5+legend.hadj, family=font,las=2, col=unique(stats::na.omit(fill.colors))[f])
+      graphics::mtext(fill.labs[f], side=4, at=u_int-(f*.5*legend.spacing), line=2+legend.hadj, family=font, las=2)
     }
   }
   # horizontal bar
-  if(horiz.bar==TRUE){abline(h=0,lty=1)}
+  if(horiz.bar==TRUE){graphics::abline(h=0,lty=1)}
   # left bar
   if(left.bar==TRUE){
-    axis(2,at=seq(lHR,1),las=2,lwd=1,labels=FALSE,lwd.ticks=leftbar.ticks,tick=left.bar)
+    graphics::axis(2,at=seq(lHR,1),las=2,lwd=1,labels=FALSE,lwd.ticks=leftbar.ticks,tick=left.bar)
   }
   # write row names and group labels (bold)
-  axis(2,at=seq(lHR,1),labels=rownames(mat),las=2,family=font,
+  graphics::axis(2,at=seq(lHR,1),labels=rownames(mat),las=2,family=font,
        lwd=0,lwd.ticks=FALSE,tick=FALSE,
        hadj=ifelse(left.align==TRUE,0,NA),
        line=ifelse(left.align==TRUE,margin.left-2.5,NA))
   if(!is.null(grouplabs)){
     lab.ind <- which(!rownames(mat)%in%rownames(omat))
     lab.ind <- lab.ind[seq(1,length(lab.ind),group.space+1)]
-    axis(2,at=seq(lHR,1)[lab.ind],labels=grouplabs,las=2,family=font,font=ifelse(group.italics==TRUE,4,2),
+    graphics::axis(2,at=seq(lHR,1)[lab.ind],labels=grouplabs,las=2,family=font,font=ifelse(group.italics==TRUE,4,2),
          lwd=ifelse(left.align==TRUE,0,left.bar*1),
          hadj=ifelse(left.align==TRUE,0,NA),
          line=ifelse(left.align==TRUE,margin.left-2,NA))
   }
-  axis(4,at=lHR+1,labels=em,las=2,line=1,tick=F,font=2,las=2,family=font)
-  axis(4,at=lHR+1,labels='95% CI',line=4,tick=F,font=2,las=2,family=font)
+  graphics::axis(4,at=lHR+1,labels=em,las=2,line=1,tick=F,font=2,las=2,family=font)
+  graphics::axis(4,at=lHR+1,labels='95% CI',line=4,tick=F,font=2,las=2,family=font)
   # write CIs
-  axis(4,at=seq(lHR,1)[select],labels=sprintf('%.2f',Round(na.omit(mat[,1]),2)),las=2,line=1,
+  graphics::axis(4,at=seq(lHR,1)[select],labels=sprintf('%.2f',Round(stats::na.omit(mat[,1]),2)),las=2,line=1,
        tick=right.bar,lwd.ticks=rightbar.ticks,family=font)
-  axis(4,at=seq(lHR,1)[select],labels=paste0(sprintf('[%.2f',Round(na.omit(mat[,2]),2)),ci.sep),las=2,line=4,tick=F,family=font)
-  axis(4,at=seq(lHR,1)[select],labels=paste0(ifelse(max(sapply(Round(na.omit(mat[,2]),2),charcount))<5,' ','   '),
-                                             sprintf('%.2f',Round(na.omit(mat[,3]),2)),']'),las=2,line=6,tick=F,family=font)
+  graphics::axis(4,at=seq(lHR,1)[select],labels=paste0(sprintf('[%.2f',Round(stats::na.omit(mat[,2]),2)),ci.sep),las=2,line=4,tick=F,family=font)
+  graphics::axis(4,at=seq(lHR,1)[select],labels=paste0(ifelse(max(sapply(Round(stats::na.omit(mat[,2]),2),charcount))<5,' ','   '),
+                                             sprintf('%.2f',Round(stats::na.omit(mat[,3]),2)),']'),las=2,line=6,tick=F,family=font)
   # add additional columns
   if(!is.null(add.columns)){
     startline=9
     for(k in 1:ncol(data.frame(add.columns))){
-      if(!is.null(add.colnames)){axis(4,at=lHR+1,labels=add.colnames[k],las=2,line=startline,tick=F,font=2,family=font)}
-      axis(4,at=seq(lHR,1)[select],labels=data.frame(add.columns)[,k],las=2,line=startline,tick=F,family=font)
+      if(!is.null(add.colnames)){graphics::axis(4,at=lHR+1,labels=add.colnames[k],las=2,line=startline,tick=F,font=2,family=font)}
+      graphics::axis(4,at=seq(lHR,1)[select],labels=data.frame(add.columns)[,k],las=2,line=startline,tick=F,family=font)
       startline <- startline+3
     }
   }
   # add p-values
   if(!is.null(pval)){
-    axis(4,at=lHR+1,labels='p-value',line=9,tick=F,font=2,las=2,family=font)
-    axis(4,at=seq(lHR,1),labels=pval,las=2,line=9,tick=F,family=font)
+    graphics::axis(4,at=lHR+1,labels='p-value',line=9,tick=F,font=2,las=2,family=font)
+    graphics::axis(4,at=seq(lHR,1),labels=pval,las=2,line=9,tick=F,family=font)
   }
   # end saving plot if type is .wmf
   if(save==TRUE){
-    if(save.type%in%c('wmf','.wmf','WMF')){savePlot(paste0(save.path,save.name,'.wmf'),type='wmf')}
-    dev.off()
+    if(save.type%in%c('wmf','.wmf','WMF')){grDevices::savePlot(paste0(save.path,save.name,'.wmf'),type='wmf')}
+    grDevices::dev.off()
   }
   # restore original plot settings
-  par(mar=opar)
-  layout(1)
+  graphics::par(mar=opar)
+  graphics::layout(1)
 }

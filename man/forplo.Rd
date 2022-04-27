@@ -228,4 +228,5 @@ forplo(mod1,
        title='Linear regression with grouped estimates')
 
 ## More examples are given in the vignette.
+
 }
