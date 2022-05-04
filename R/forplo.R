@@ -201,14 +201,8 @@ forplo <- function(mat,
   # if row.labels are given, replace rownames
   if(!is.null(row.labels)){
     if(length(row.labels)!=nrow(mat)){stop('The length of row.labels should be equal to the number of rows of mat.')}
-    if(any(duplicated(row.labels))==TRUE){
-      dups <- which(duplicated(row.labels))
-      row.labels2 <- make.unique(row.labels)
-      ec <- as.numeric(gsub('.*\\.','',row.labels2)[dups])
-      row.labels[dups] <- paste0(row.labels[dups],
-                                 unlist(lapply(ec,function(x) paste0(rep(' ',x),collapse=''))))
-    }
-    rownames(mat) <- row.labels}
+    row.labels2 <- seq_along(row.labels)
+    rownames(mat) <- row.labels2}
   # function to count number of characters
   charcount <- function(x){
     length(unlist(strsplit(as.character(x),'')))
@@ -476,7 +470,9 @@ forplo <- function(mat,
     graphics::axis(2,at=seq(lHR,1),las=2,lwd=1,labels=FALSE,lwd.ticks=leftbar.ticks,tick=left.bar)
   }
   # write row names and group labels (bold)
-  graphics::axis(2,at=seq(lHR,1),labels=rownames(mat),las=2,family=font,
+  graphics::axis(2,at=seq(lHR,1),
+                 labels=row.labels[as.numeric(rownames(mat))],
+                 las=2,family=font,
        lwd=0,lwd.ticks=FALSE,tick=FALSE,
        hadj=ifelse(left.align==TRUE,0,NA),
        line=ifelse(left.align==TRUE,margin.left-2.5,NA))
