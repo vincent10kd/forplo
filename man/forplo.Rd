@@ -43,6 +43,7 @@ forplo(
   diamond.line = TRUE,
   add.columns = NULL,
   add.colnames = NULL,
+  column.spacing = 3,
   right.bar = FALSE,
   rightbar.ticks = 0,
   left.bar = TRUE,
@@ -147,6 +148,8 @@ forplo(
 \item{add.columns}{A data.frame of nrow(mat) with additional columns to add to the right of the plot.}
 
 \item{add.colnames}{A character vector of length ncol(add.columns) with column labels for these columns.}
+
+\item{column.spacing}{A constant that controls the horizontal spacing between added columns.}
 
 \item{right.bar}{Set to TRUE to show a vertical bar directly to the left of the estimates.}
 
