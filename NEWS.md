@@ -1,3 +1,9 @@
-# forplo 0.1.0
+# forplo 0.2.5
 
-* Added a `NEWS.md` file to track changes to the package.
+* Several new features are now supported in this version:
+- adding arrows underneath the plot
+- adding a legend
+- sorting within groups
+- indenting groups
+- miscellaneous bug fixes
+- more coming soon..
