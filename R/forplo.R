@@ -30,7 +30,7 @@
 #' @param arrow.left.length Controls the length of the arrow pointing left.
 #' @param arrow.right.length Controls the length of the arrow pointing right.
 #' @param arrow.vadj Allows to adjust the vertical placement of the arrows.
-#' @param sort Set to TRUE to sort the rows by effect size (not compatible with groups or diamond).
+#' @param sort Set to TRUE to sort the rows by effect size (not compatible diamond).
 #' @param char Controls the character to display for the dots. Equivalent to pch in the base R plot function.
 #' @param size Controls the size of the dots. Equivalent to cex in the base R plot function.
 #' @param col Controls the color of the dots. Equivalent to col in the base R plot function.
@@ -346,9 +346,11 @@ forplo <- function(mat,
         grp.sort[which(grp.vec == g)] <- which(grp.vec == g)[order(mat[grp.vec == g,1], decreasing=TRUE)]
       }
       sort.index <- grp.sort
-      add.columns2 <- data.frame(matrix(nrow=nrow(mat),ncol=ncol(add.columns)))
-      add.columns2[select,] <- add.columns
-      add.columns <- add.columns2
+      if(!is.null(add.columns)){
+        add.columns2 <- data.frame(matrix(nrow=nrow(mat),ncol=ncol(add.columns)))
+        add.columns2[select,] <- add.columns
+        add.columns <- add.columns2
+      }
     }
     if(is.null(groups)){sort.index <- order(mat[,1],decreasing=T)}
     mat <- mat[sort.index,]

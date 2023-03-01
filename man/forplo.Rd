@@ -125,7 +125,7 @@ forplo(
 
 \item{arrow.vadj}{Allows to adjust the vertical placement of the arrows.}
 
-\item{sort}{Set to TRUE to sort the rows by effect size (not compatible with groups or diamond).}
+\item{sort}{Set to TRUE to sort the rows by effect size (not compatible diamond).}
 
 \item{char}{Controls the character to display for the dots. Equivalent to pch in the base R plot function.}
 
