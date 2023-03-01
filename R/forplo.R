@@ -185,7 +185,7 @@ forplo <- function(mat,
   if(class(omat)[1]%in%c('lm','glm')){
     pval <- Round(summary(mat)$coef[-1,4],4)
     pval[pval==0.0000] <- '<0.0001'
-    mat <- cbind(stats::coef(mat),stats::confint(mat))[-1,]
+    mat <- data.frame(stats::coef(mat),stats::confint(mat))[-1,]
     colnames(mat) <- c('est','lci','uci')
     if(stats::family(omat)$family=='gaussian'){linreg <- TRUE}
     else{
@@ -197,7 +197,7 @@ forplo <- function(mat,
     em <- 'HR'
     pval <- Round(summary(mat)$coef[,5],4)
     pval[pval<=0.0000] <- '<0.0001'
-    mat <- exp(cbind(stats::coef(mat),stats::confint(mat)))
+    mat <- exp(data.frame(stats::coef(mat),stats::confint(mat)))
     colnames(mat) <- c('est','lci','uci')
   }
   # if row.labels are given, replace rownames
